@@ -1,1 +1,1 @@
-Import-Module .\ModuleName -Verbose
+Import-Module .\AcumaticaNodeHelper -Verbose
