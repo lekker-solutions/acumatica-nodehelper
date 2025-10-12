@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch",
+            "type": "PowerShell",
+            "request": "launch",
+            "script": "${workspaceFolder}\\.vscode\\launch.ps1",
+            "cwd": "${workspaceFolder}",
+            "args": [],  // If you need to pass any arguments to the script
+            "internalConsoleOptions": "openOnSessionStart" // Opens the debug console automatically when a debugging session starts
+        }
+    ]
+}

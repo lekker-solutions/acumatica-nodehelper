@@ -1,0 +1,2 @@
+# powershellModuleTemplate
+Powershell Module Template
