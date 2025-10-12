@@ -95,7 +95,7 @@
         PSData = @{
 
             # Tags applied to this module. These help with module discovery in online galleries.
-            Tags       = @('Acumatica', 'Acumatica ERP')
+            Tags       = @('Acumatica', 'AcumaticaERP')
 
             # License URI
             LicenseUri = 'https://www.gnu.org/licenses/gpl-3.0.en.html'
