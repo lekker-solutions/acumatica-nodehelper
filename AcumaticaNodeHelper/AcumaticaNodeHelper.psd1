@@ -12,7 +12,7 @@
     RootModule        = 'AcumaticaNodeHelper.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '1.0.1'
+    ModuleVersion     = '1.0.2'
 
     # Supported PSEditions
     # CompatiblePSEditions = @()
@@ -69,7 +69,7 @@
     # NestedModules = @()
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-    FunctionsToExport = @('Invoke-NodeBuild', 'Invoke-NodeGetModules')
+    FunctionsToExport = @('Invoke-NodeBuild', 'Invoke-NodeGetModules', 'Invoke-NodeWatch')
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport   = @()
@@ -110,7 +110,7 @@
             # IconUri = ''
 
             # ReleaseNotes of this module
-            ReleaseNotes = 'Implemented Invoke-NodeGetModules'
+            ReleaseNotes = 'Implemented -Development flag on Invoke-NodeBuild to pass --customFolder=development to npm build commands. Implemented Invoke-NodeWatch cmdlet to run npm watch with specified screen IDs and/or modules.'
 
             # Prerelease string of this module
             # Prerelease = ''
