@@ -471,7 +471,7 @@ function Invoke-NpmCommand {
         # Log the full command being executed
         Write-Host "Executing: $($Environment.NpmPath) $argsList" -ForegroundColor Cyan
         
-        $process = Start-Process -FilePath $env:NpmPath -ArgumentList $argsList -NoNewWindow -Wait -PassThru -WorkingDirectory "\frontendSources\screen"
+        $process = Start-Process -FilePath $Environment.NpmPath -ArgumentList $argsList -NoNewWindow -Wait -PassThru -WorkingDirectory $Environment.FrontendSources
         
         if ($process.ExitCode -eq 0) {
             Write-Host $SuccessMessage -ForegroundColor Green

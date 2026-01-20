@@ -12,7 +12,7 @@
     RootModule        = 'AcumaticaNodeHelper.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '1.0.2'
+    ModuleVersion     = '1.0.3'
 
     # Supported PSEditions
     # CompatiblePSEditions = @()
@@ -110,7 +110,7 @@
             # IconUri = ''
 
             # ReleaseNotes of this module
-            ReleaseNotes = 'Implemented -Development flag on Invoke-NodeBuild to pass --customFolder=development to npm build commands. Implemented Invoke-NodeWatch cmdlet to run npm watch with specified screen IDs and/or modules.'
+            ReleaseNotes = 'Bug fixed new features'
 
             # Prerelease string of this module
             # Prerelease = ''
