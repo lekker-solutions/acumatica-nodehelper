@@ -26,43 +26,32 @@ A PowerShell module for automating Acumatica FrontendSources build and watch tas
 - Acumatica instance with FrontendSources directory
 - Node.js path configured in Web.config (`NodeJs:NodeJsPath` app setting)
 
-### Install the Module
+### Install from PowerShell Gallery (Recommended)
 
-1. **Find your PowerShell modules directory:**
 ```powershell
-   $env:PSModulePath -split ';'
-```
-   Common locations:
-   - `C:\Users\<username>\Documents\PowerShell\Modules` (PowerShell 7+)
-   - `C:\Users\<username>\Documents\WindowsPowerShell\Modules` (PowerShell 5.1)
-
-2. **Create the module directory:**
-```powershell
-   $modulePath = "$HOME\Documents\WindowsPowerShell\Modules\AcumaticaNodeHelper"
-   New-Item -ItemType Directory -Path $modulePath -Force
+Install-Module -Name AcumaticaNodeHelper
 ```
 
-3. **Copy the module files:**
-   - Save the module script as `AcumaticaNodeHelper.psm1` in the module directory
-   - Create a module manifest (optional but recommended):
+To update to the latest version:
 ```powershell
-   New-ModuleManifest -Path "$modulePath\AcumaticaNodeHelper.psd1" `
-       -RootModule "AcumaticaNodeHelper.psm1" `
-       -ModuleVersion "1.0.0" `
-       -Author "Your Name" `
-       -Description "Acumatica Node.js build automation tools" `
-       -PowerShellVersion "5.1" `
-       -FunctionsToExport @('Invoke-NodeBuild', 'Invoke-NodeWatch', 'Invoke-NodeGetModules', 'Get-NodeEnvironment')
+Update-Module -Name AcumaticaNodeHelper
 ```
 
-4. **Import the module:**
+### Install from Source
+
+1. **Clone the repository:**
 ```powershell
-   Import-Module AcumaticaNodeHelper
+git clone https://github.com/lekker-solutions/acumatica-nodehelper.git
 ```
 
-5. **Verify installation:**
+2. **Import the module:**
 ```powershell
-   Get-Command -Module AcumaticaNodeHelper
+Import-Module ./acumatica-nodehelper/AcumaticaNodeHelper
+```
+
+3. **Verify installation:**
+```powershell
+Get-Command -Module AcumaticaNodeHelper
 ```
 
 ### Auto-load on Startup (Optional)
