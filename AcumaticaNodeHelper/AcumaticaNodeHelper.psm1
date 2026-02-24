@@ -61,7 +61,11 @@ function Invoke-NodeBuild {
     - Web.config with NodeJs:NodeJsPath app setting
     - FrontendSources directory in the site root
     - npm.cmd in the Node.js installation path
-    
+    - node_modules installed via Invoke-NodeGetModules
+
+    The module prepends the web.config Node.js path to PATH before execution,
+    ensuring all child processes (node, npx, gulp, etc.) use the correct version.
+
     .LINK
     Invoke-NodeWatch
     Invoke-NodeGetModules
@@ -213,7 +217,11 @@ function Invoke-NodeWatch {
       * Web.config with NodeJs:NodeJsPath app setting
       * FrontendSources\screen directory in the site root
       * npm.cmd in the Node.js installation path
-    
+      * node_modules installed via Invoke-NodeGetModules
+
+    The module prepends the web.config Node.js path to PATH before execution,
+    ensuring all child processes (node, npx, gulp, etc.) use the correct version.
+
     .LINK
     Invoke-NodeBuild
     Invoke-NodeGetModules
@@ -349,6 +357,7 @@ function Invoke-NodeGetModules {
         }
         
         return Invoke-NpmCommand -Environment $env -Script "getmodules" `
+            -SkipModulesCheck `
             -SuccessMessage "Successfully retrieved node modules" `
             -ActionMessage "Getting node modules..."
     }
@@ -359,6 +368,35 @@ function Invoke-NodeGetModules {
 }
 
 function Get-NodeEnvironment {
+    <#
+    .SYNOPSIS
+    Gets the Node.js environment configuration from an Acumatica site's Web.config.
+
+    .DESCRIPTION
+    Reads the NodeJs:NodeJsPath app setting from Web.config and validates that the required
+    paths exist (Web.config, FrontendSources directory, npm.cmd). Returns a hashtable with
+    resolved paths for use by other module functions.
+
+    .PARAMETER SiteDirectory
+    Path to the Acumatica site directory containing Web.config.
+
+    .EXAMPLE
+    $env = Get-NodeEnvironment -SiteDirectory "."
+    $env.NodeJsPath   # e.g., C:\Program Files\AcumaticaTools\NodeJS\node-v22.11.0-win-x64
+    $env.NpmPath       # e.g., C:\Program Files\AcumaticaTools\NodeJS\node-v22.11.0-win-x64\npm.cmd
+
+    .OUTPUTS
+    System.Collections.Hashtable
+    Returns a hashtable with keys: SiteRoot, NodeJsPath, FrontendSources, NpmPath.
+    Returns $null on failure.
+
+    .NOTES
+    This is an internal function not exported by the module.
+    The Web.config must contain an appSettings entry with key "NodeJs:NodeJsPath".
+
+    .LINK
+    Invoke-NpmCommand
+    #>
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
@@ -412,38 +450,95 @@ function Get-NodeEnvironment {
 }
 
 function Invoke-NpmCommand {
+    <#
+    .SYNOPSIS
+    Executes an npm script using the Node.js environment from web.config.
+
+    .DESCRIPTION
+    Internal helper that runs npm commands in the FrontendSources directory using the Node.js
+    installation specified in web.config. Temporarily prepends the web.config Node.js path to
+    PATH so all child processes (node, npx, gulp, etc.) resolve to the correct version.
+
+    Validates that node_modules exists before running unless -SkipModulesCheck is specified.
+
+    .PARAMETER Environment
+    Hashtable returned by Get-NodeEnvironment containing SiteRoot, NodeJsPath, FrontendSources, and NpmPath.
+
+    .PARAMETER Script
+    The npm script name to run (e.g., "build-dev", "watch", "getmodules").
+
+    .PARAMETER ScriptArguments
+    Hashtable of key=value pairs to pass as --env arguments.
+
+    .PARAMETER ParameterOrder
+    Array of keys controlling the order of ScriptArguments in the command.
+
+    .PARAMETER UsePrefix
+    When specified, adds --prefix <path> to the npm command.
+
+    .PARAMETER UseTripleDash
+    When specified, uses --- separator before --env arguments.
+
+    .PARAMETER SkipModulesCheck
+    Skips the node_modules existence check. Used by Invoke-NodeGetModules since it installs node_modules.
+
+    .PARAMETER SuccessMessage
+    Message displayed on successful completion.
+
+    .PARAMETER ActionMessage
+    Message displayed before execution starts.
+
+    .NOTES
+    This is an internal function not exported by the module.
+    PATH is always restored in the finally block, even if the command fails or is interrupted.
+    #>
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
         [hashtable]$Environment,
-        
+
         [Parameter(Mandatory)]
         [string]$Script,
-        
+
         [Parameter()]
         [hashtable]$ScriptArguments = @{},
-        
+
         [Parameter()]
         [string[]]$ParameterOrder = @(),
-        
+
         [Parameter()]
         [string]$UsePrefix = "",
-        
+
         [Parameter()]
         [switch]$UseTripleDash,
-        
+
+        [Parameter()]
+        [switch]$SkipModulesCheck,
+
         [Parameter(Mandatory)]
         [string]$SuccessMessage,
-        
+
         [Parameter(Mandatory)]
         [string]$ActionMessage
     )
-    
+
+    # Validate node_modules exists before running (skip for getmodules which installs them)
+    if (-not $SkipModulesCheck) {
+        $nodeModulesPath = Join-Path $Environment.FrontendSources "node_modules"
+        if (-not (Test-Path $nodeModulesPath)) {
+            throw "node_modules not found at: $nodeModulesPath. Run Invoke-NodeGetModules first to install dependencies."
+        }
+    }
+
     Write-Host $ActionMessage -ForegroundColor Yellow
-    
+
+    # Save original PATH and prepend web.config Node.js path so all child processes use the correct version
+    $originalPath = $env:PATH
+    $env:PATH = "$($Environment.NodeJsPath);$env:PATH"
+
     try {
         Push-Location $Environment.SiteRoot
-        
+
         # Build arguments: npm run <script> [--prefix path] [---] [--env key=value,key=value,...]
         $argsList = "run $Script"
         
@@ -483,6 +578,7 @@ function Invoke-NpmCommand {
         }
     }
     finally {
+        $env:PATH = $originalPath
         Pop-Location
     }
 }

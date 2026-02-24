@@ -1,6 +1,6 @@
 # Acumatica Node Build PowerShell Module
 
-A PowerShell module for automating Acumatica FrontendSources build and watch tasks using npm scripts configured in your site's Web.config.
+A PowerShell module for automating Acumatica FrontendSources build and watch tasks using the Node.js version and npm scripts configured in your site's Web.config. The module ensures all child processes (node, npx, gulp, etc.) use the correct Node.js version by prepending the web.config path to `PATH` during execution.
 
 ## Table of Contents
 
@@ -38,16 +38,16 @@ A PowerShell module for automating Acumatica FrontendSources build and watch tas
 
 2. **Create the module directory:**
 ```powershell
-   $modulePath = "$HOME\Documents\WindowsPowerShell\Modules\AcumaticaNode"
+   $modulePath = "$HOME\Documents\WindowsPowerShell\Modules\AcumaticaNodeHelper"
    New-Item -ItemType Directory -Path $modulePath -Force
 ```
 
 3. **Copy the module files:**
-   - Save the module script as `AcumaticaNode.psm1` in the module directory
+   - Save the module script as `AcumaticaNodeHelper.psm1` in the module directory
    - Create a module manifest (optional but recommended):
 ```powershell
-   New-ModuleManifest -Path "$modulePath\AcumaticaNode.psd1" `
-       -RootModule "AcumaticaNode.psm1" `
+   New-ModuleManifest -Path "$modulePath\AcumaticaNodeHelper.psd1" `
+       -RootModule "AcumaticaNodeHelper.psm1" `
        -ModuleVersion "1.0.0" `
        -Author "Your Name" `
        -Description "Acumatica Node.js build automation tools" `
@@ -57,12 +57,12 @@ A PowerShell module for automating Acumatica FrontendSources build and watch tas
 
 4. **Import the module:**
 ```powershell
-   Import-Module AcumaticaNode
+   Import-Module AcumaticaNodeHelper
 ```
 
 5. **Verify installation:**
 ```powershell
-   Get-Command -Module AcumaticaNode
+   Get-Command -Module AcumaticaNodeHelper
 ```
 
 ### Auto-load on Startup (Optional)
@@ -73,7 +73,7 @@ Add to your PowerShell profile to auto-load the module:
 notepad $PROFILE
 
 # Add this line
-Import-Module AcumaticaNode
+Import-Module AcumaticaNodeHelper
 ```
 
 ---
@@ -83,6 +83,9 @@ Import-Module AcumaticaNode
 # Navigate to your Acumatica site directory
 cd C:\inetpub\Acumatica\MySite
 
+# Install dependencies (required before build or watch)
+Invoke-NodeGetModules
+
 # Build a specific page
 Invoke-NodeBuild -Pages "AR303000"
 
@@ -91,9 +94,6 @@ Invoke-NodeBuild -Pages "AR303000" -Development
 
 # Start watch mode for a page
 Invoke-NodeWatch -ScreenIds "AR303000"
-
-# Get node modules
-Invoke-NodeGetModules
 ```
 
 ---
@@ -407,8 +407,12 @@ Invoke-NodeBuild -Pages "AR303000" -SiteDirectory $site2
 - Check that npm.cmd exists in the specified directory
 - You may need to reinstall Node.js
 
+**"node_modules not found ... Run Invoke-NodeGetModules first"**
+- Run `Invoke-NodeGetModules` to install dependencies before using `Invoke-NodeBuild` or `Invoke-NodeWatch`
+- This is required after a fresh clone or after clearing modules
+
 **"npm command failed with exit code"**
-- Check that npm dependencies are installed (run `npm install` in FrontendSources)
+- Ensure you have run `Invoke-NodeGetModules` to install dependencies
 - Review the npm output for specific error messages
 - Ensure the npm script exists in FrontendSources/package.json
 - Verify you have sufficient permissions
@@ -472,6 +476,18 @@ Your FrontendSources/package.json must define the following npm scripts:
   }
 }
 ```
+
+### Node Modules
+
+Before running `Invoke-NodeBuild` or `Invoke-NodeWatch`, you must install dependencies:
+```powershell
+Invoke-NodeGetModules
+```
+The module will error with a clear message if `node_modules` is missing.
+
+### Node.js Version Handling
+
+The module reads the Node.js path from `NodeJs:NodeJsPath` in Web.config and temporarily prepends it to `PATH` during command execution. This ensures that all child processes spawned by npm scripts (node, npx, gulp, etc.) use the same Node.js version, even if other versions are installed on your system. The original `PATH` is restored after execution.
 
 ### gulp Configuration
 
@@ -577,20 +593,21 @@ foreach ($page in $pages) {
 
 ## Best Practices
 
-1. **Use watch mode during development** - It saves time by automatically rebuilding on file changes
-2. **Specify screens/modules in watch mode** - Don't run watch without parameters
-3. **Use `-Development` flag during development** - Faster builds with development configurations
-4. **Build without flags for production** - Ensures optimized builds
-5. **Run `Invoke-NodeGetModules` after updating** - Ensures you have the latest dependencies
-6. **Use `-SiteDirectory` for multi-site setups** - Makes it clear which site you're targeting
+1. **Always run `Invoke-NodeGetModules` first** - Required before build or watch; the module will error if node_modules are missing
+2. **Use watch mode during development** - It saves time by automatically rebuilding on file changes
+3. **Specify screens/modules in watch mode** - Don't run watch without parameters
+4. **Use `-Development` flag during development** - Faster builds with development configurations
+5. **Build without flags for production** - Ensures optimized builds
+6. **Run `Invoke-NodeGetModules` after updating** - Ensures you have the latest dependencies
+7. **Use `-SiteDirectory` for multi-site setups** - Makes it clear which site you're targeting
 
 ---
 
 ## Module Structure
 ```
-AcumaticaNode/
-├── AcumaticaNode.psm1      # Main module file with all functions
-├── AcumaticaNode.psd1      # Module manifest (optional)
+AcumaticaNodeHelper/
+├── AcumaticaNodeHelper.psm1      # Main module file with all functions
+├── AcumaticaNodeHelper.psd1      # Module manifest (optional)
 └── README.md               # This file
 ```
 

@@ -12,7 +12,7 @@
     RootModule        = 'AcumaticaNodeHelper.psm1'
 
     # Version number of this module.
-    ModuleVersion     = '1.0.3'
+    ModuleVersion     = '1.1.0'
 
     # Supported PSEditions
     # CompatiblePSEditions = @()
@@ -110,7 +110,7 @@
             # IconUri = ''
 
             # ReleaseNotes of this module
-            ReleaseNotes = 'Bug fixed new features'
+            ReleaseNotes = 'Allowed for node location defined in the web.config prepended to the PATH variable, so that the correct version of node and npm are used when executing commands. Updated help documentation and the README'
 
             # Prerelease string of this module
             # Prerelease = ''
