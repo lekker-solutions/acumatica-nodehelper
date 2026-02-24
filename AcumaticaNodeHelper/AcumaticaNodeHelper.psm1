@@ -109,8 +109,8 @@ function Invoke-NodeBuild {
         
         if (-not [string]::IsNullOrWhiteSpace($Pages)) {
             # Convert space-separated to comma-separated
-            $scriptArgs['pageIds'] = $Pages -replace '\s+', ','
-            $paramOrder += 'pageIds'
+            $scriptArgs['screenIds'] = $Pages -replace '\s+', ','
+            $paramOrder += 'screenIds'
         }
         
         if (-not [string]::IsNullOrWhiteSpace($Modules)) {
@@ -127,8 +127,8 @@ function Invoke-NodeBuild {
         
         # Build action message
         $messageParts = @()
-        if ($scriptArgs.ContainsKey('pageIds')) {
-            $messageParts += "pageIds '$($scriptArgs['pageIds'])'"
+        if ($scriptArgs.ContainsKey('screenIds')) {
+            $messageParts += "screenIds '$($scriptArgs['screenIds'])'"
         }
         if ($scriptArgs.ContainsKey('modules')) {
             $messageParts += "modules '$($scriptArgs['modules'])'"

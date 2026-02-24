@@ -126,13 +126,13 @@ Executes: `npm run build-dev`
 ```powershell
 Invoke-NodeBuild -Pages "AR303000"
 ```
-Executes: `npm run build-dev --- --env pageIds=AR303000`
+Executes: `npm run build-dev --- --env screenIds=AR303000`
 
 **Build multiple pages:**
 ```powershell
 Invoke-NodeBuild -Pages "AR303000 AR304000"
 ```
-Executes: `npm run build-dev --- --env pageIds=AR303000,AR304000`
+Executes: `npm run build-dev --- --env screenIds=AR303000,AR304000`
 
 **Build with modules:**
 ```powershell
@@ -144,13 +144,13 @@ Executes: `npm run build-dev --- --env modules=AR,AP`
 ```powershell
 Invoke-NodeBuild -Pages "AR303000" -Development
 ```
-Executes: `npm run build-dev --- --env pageIds=AR303000,customFolder=development`
+Executes: `npm run build-dev --- --env screenIds=AR303000,customFolder=development`
 
 **Build with all options:**
 ```powershell
 Invoke-NodeBuild -Pages "AR303000 AR304000" -Modules "AR" -Development
 ```
-Executes: `npm run build-dev --- --env pageIds=AR303000,AR304000,modules=AR,customFolder=development`
+Executes: `npm run build-dev --- --env screenIds=AR303000,AR304000,modules=AR,customFolder=development`
 
 **Build from specific directory:**
 ```powershell
@@ -161,7 +161,7 @@ Invoke-NodeBuild -Pages "AR303000" -SiteDirectory "C:\inetpub\Acumatica\MySite"
 ```powershell
 Invoke-NodeBuild "AR303000" "AR"
 ```
-Executes: `npm run build-dev --- --env pageIds=AR303000,modules=AR`
+Executes: `npm run build-dev --- --env screenIds=AR303000,modules=AR`
 
 #### Return Value
 Returns `$true` on success, `$false` on failure.
@@ -484,7 +484,7 @@ The gulp tasks must support the `--env` flag with comma-separated key=value pair
 ```javascript
 // Example gulp configuration
 gulp.task('buildDev', () => {
-  const env = parseEnvArgs(); // { pageIds: 'AR303000', customFolder: 'development' }
+  const env = parseEnvArgs(); // { screenIds: 'AR303000', customFolder: 'development' }
   // Build logic here
 });
 ```
@@ -536,7 +536,7 @@ The module ensures parameters are passed to npm in the correct order (pages/scre
 Invoke-NodeBuild -Pages "AR303000" -Modules "AR" -Development
 
 # Generates this npm command (note the order)
-npm run build-dev --- --env pageIds=AR303000,modules=AR,customFolder=development
+npm run build-dev --- --env screenIds=AR303000,modules=AR,customFolder=development
 ```
 
 ### Space vs Comma Separation
@@ -549,7 +549,7 @@ Invoke-NodeBuild -Pages "AR303000,AR304000"
 
 # Mixed spacing is handled correctly
 Invoke-NodeBuild -Pages "AR303000,  AR304000   AR305000"
-# Results in: pageIds=AR303000,AR304000,AR305000
+# Results in: screenIds=AR303000,AR304000,AR305000
 ```
 
 ### Error Handling
