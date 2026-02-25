@@ -1,36 +1,44 @@
-name: main
+name: Publish
 
 on:
-  pull_request:
-    branches: 
-      - '**'  # This will trigger the workflow for pull requests on any branch
   push:
-    branches:
-      - 'main'  # This will trigger the workflow for pushes (merges) to the main branch
+    tags:
+      - '[0-9]*.[0-9]*.[0-9]*'
 
 jobs:
-  test:
+  test-and-publish:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
+      - name: Validate tag format
+        run: |
+          if ("${{ github.ref_name }}" -notmatch '^\d+\.\d+\.\d+$') {
+            Write-Error "Tag '${{ github.ref_name }}' does not match required format #.#.#"
+            exit 1
+          }
+        shell: pwsh
+
+      - name: Update Module Manifest
+        env:
+          RELEASE_NOTES: ${{ github.event.head_commit.message }}
+        run: |
+          $psdPath = ".\AcumaticaNodeHelper\AcumaticaNodeHelper.psd1"
+          Update-ModuleManifest -Path $psdPath -ModuleVersion "${{ github.ref_name }}" -ReleaseNotes $env:RELEASE_NOTES
+        shell: pwsh
 
       - name: Test Module Manifest
         run: Test-ModuleManifest -Path .\AcumaticaNodeHelper\AcumaticaNodeHelper.psd1
+        shell: pwsh
 
       - name: Install Pester
         run: Install-Module -Name Pester -Force -SkipPublisherCheck
+        shell: pwsh
 
       - name: Test
         run: Invoke-Pester -Path AcumaticaNodeHelper.Tests.ps1
-
-  publish:
-    if: github.ref == 'refs/heads/main' # This job only runs when the branch is 'main'
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v3
+        shell: pwsh
 
       - name: Publish to PowerShell Gallery
-        env:
-          NUGET_API_KEY: ${{ secrets.POWERSHELL_GALLERY_API_KEY }}
-        run: |
-          Publish-Module -Path AcumaticaNodeHelper -NuGetApiKey ${{ secrets.POWERSHELL_GALLERY_API_KEY }} -Verbose
+        run: Publish-Module -Path AcumaticaNodeHelper -NuGetApiKey ${{ secrets.POWERSHELL_GALLERY_API_KEY }} -Verbose
+        shell: pwsh
